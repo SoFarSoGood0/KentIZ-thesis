@@ -1,0 +1,750 @@
+import 'dart:math';
+import 'package:flutter/material.dart';
+
+class KentizAuthScreen extends StatefulWidget {
+  const KentizAuthScreen({super.key});
+
+  @override
+  State<KentizAuthScreen> createState() => _KentizAuthScreenState();
+}
+
+class _KentizAuthScreenState extends State<KentizAuthScreen>
+    with SingleTickerProviderStateMixin {
+  bool isLogin = true;
+  bool obscurePassword = true;
+
+  late AnimationController glowController;
+
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final nameController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    glowController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    glowController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    nameController.dispose();
+    super.dispose();
+  }
+
+  void changeMode(bool login) {
+    setState(() {
+      isLogin = login;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF030914),
+      body: Stack(
+        children: [
+          const Positioned.fill(
+            child: _AuthBackground(),
+          ),
+
+          SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
+              child: Column(
+                children: [
+                  const SizedBox(height: 18),
+
+                  AnimatedBuilder(
+                    animation: glowController,
+                    builder: (context, child) {
+                      final value = glowController.value;
+                      return Container(
+                        width: 94,
+                        height: 94,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          color: const Color(0xFF06151F),
+                          border: Border.all(
+                            color: const Color(0xFF12D9E6).withOpacity(0.7),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF12D9E6)
+                                  .withOpacity(0.22 + value * 0.18),
+                              blurRadius: 34 + value * 18,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.location_city_rounded,
+                          color: Color(0xFF15E6E1),
+                          size: 48,
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 26),
+
+                  const Text(
+                    "Kentİz",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 58,
+                      fontWeight: FontWeight.w900,
+                      height: 0.95,
+                      letterSpacing: -2.8,
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  Text(
+                    "Şehrin sesini duyur",
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.64),
+                      fontSize: 24,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: -0.4,
+                    ),
+                  ),
+
+                  const SizedBox(height: 44),
+
+                  _ModeSwitch(
+                    isLogin: isLogin,
+                    onLoginTap: () => changeMode(true),
+                    onRegisterTap: () => changeMode(false),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 360),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0.08, 0),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: isLogin ? _loginForm() : _registerForm(),
+                  ),
+
+                  const SizedBox(height: 34),
+
+                  if (isLogin)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {},
+                        style: TextButton.styleFrom(
+                          foregroundColor: const Color(0xFF12D9E6),
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: const Text(
+                          "Şifremi unuttum?",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            decoration: TextDecoration.underline,
+                            decorationColor: Color(0xFF12D9E6),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  SizedBox(height: isLogin ? 34 : 20),
+
+                  _PrimaryButton(
+                    text: isLogin ? "Giriş Yap" : "Kayıt Ol",
+                    onTap: () {
+                      // TODO: login/register işlemini buraya bağla
+                    },
+                  ),
+
+                  const SizedBox(height: 52),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: Colors.white.withOpacity(0.08),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                        child: Text(
+                          "veya",
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.42),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: Colors.white.withOpacity(0.08),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 34),
+
+                  GestureDetector(
+                    onTap: () => changeMode(!isLogin),
+                    child: RichText(
+                      text: TextSpan(
+                        text: isLogin ? "Hesabın yok mu?  " : "Zaten hesabın var mı?  ",
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.52),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: isLogin ? "Kayıt Ol" : "Giriş Yap",
+                            style: const TextStyle(
+                              color: Color(0xFF12D9E6),
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 96),
+                ],
+              ),
+            ),
+          ),
+
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 135,
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _CityLinePainter(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _loginForm() {
+    return Column(
+      key: const ValueKey("login-form"),
+      children: [
+        _NeonInput(
+          controller: emailController,
+          hint: "E-posta",
+          icon: Icons.mail_outline_rounded,
+          keyboardType: TextInputType.emailAddress,
+        ),
+        const SizedBox(height: 16),
+        _NeonInput(
+          controller: passwordController,
+          hint: "Şifre",
+          icon: Icons.lock_outline_rounded,
+          obscureText: obscurePassword,
+          suffix: IconButton(
+            onPressed: () {
+              setState(() {
+                obscurePassword = !obscurePassword;
+              });
+            },
+            icon: Icon(
+              obscurePassword
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined,
+              color: Colors.white.withOpacity(0.45),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _registerForm() {
+    return Column(
+      key: const ValueKey("register-form"),
+      children: [
+        _NeonInput(
+          controller: nameController,
+          hint: "Ad Soyad",
+          icon: Icons.person_outline_rounded,
+        ),
+        const SizedBox(height: 16),
+        _NeonInput(
+          controller: emailController,
+          hint: "E-posta",
+          icon: Icons.mail_outline_rounded,
+          keyboardType: TextInputType.emailAddress,
+        ),
+        const SizedBox(height: 16),
+        _NeonInput(
+          controller: passwordController,
+          hint: "Şifre",
+          icon: Icons.lock_outline_rounded,
+          obscureText: obscurePassword,
+          suffix: IconButton(
+            onPressed: () {
+              setState(() {
+                obscurePassword = !obscurePassword;
+              });
+            },
+            icon: Icon(
+              obscurePassword
+                  ? Icons.visibility_outlined
+                  : Icons.visibility_off_outlined,
+              color: Colors.white.withOpacity(0.45),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ModeSwitch extends StatelessWidget {
+  final bool isLogin;
+  final VoidCallback onLoginTap;
+  final VoidCallback onRegisterTap;
+
+  const _ModeSwitch({
+    required this.isLogin,
+    required this.onLoginTap,
+    required this.onRegisterTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 74,
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: const Color(0xFF071321).withOpacity(0.86),
+        borderRadius: BorderRadius.circular(34),
+        border: Border.all(
+          color: const Color(0xFF3D5671).withOpacity(0.7),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF12D9E6).withOpacity(0.08),
+            blurRadius: 24,
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          AnimatedAlign(
+            duration: const Duration(milliseconds: 320),
+            curve: Curves.easeOutCubic,
+            alignment: isLogin ? Alignment.centerLeft : Alignment.centerRight,
+            child: FractionallySizedBox(
+              widthFactor: 0.5,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF13EFE4).withOpacity(0.85),
+                      const Color(0xFF0B71FF).withOpacity(0.72),
+                    ],
+                  ),
+                  border: Border.all(
+                    color: const Color(0xFF12D9E6).withOpacity(0.9),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF12D9E6).withOpacity(0.32),
+                      blurRadius: 28,
+                      spreadRadius: -4,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: onLoginTap,
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(
+                    child: Text(
+                      "Giriş Yap",
+                      style: TextStyle(
+                        color: isLogin
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.38),
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: onRegisterTap,
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(
+                    child: Text(
+                      "Kayıt Ol",
+                      style: TextStyle(
+                        color: !isLogin
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.38),
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NeonInput extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
+  final IconData icon;
+  final TextInputType? keyboardType;
+  final bool obscureText;
+  final Widget? suffix;
+
+  const _NeonInput({
+    required this.controller,
+    required this.hint,
+    required this.icon,
+    this.keyboardType,
+    this.obscureText = false,
+    this.suffix,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 78,
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A1727).withOpacity(0.86),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: const Color(0xFF52677F).withOpacity(0.62),
+        ),
+      ),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        obscureText: obscureText,
+        cursorColor: const Color(0xFF12D9E6),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.w500,
+        ),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: hint,
+          hintStyle: TextStyle(
+            color: Colors.white.withOpacity(0.32),
+            fontSize: 20,
+            fontWeight: FontWeight.w500,
+          ),
+          prefixIcon: Icon(
+            icon,
+            color: const Color(0xFF12D9E6).withOpacity(0.78),
+            size: 26,
+          ),
+          suffixIcon: suffix,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 24,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PrimaryButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onTap;
+
+  const _PrimaryButton({
+    required this.text,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 82,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF13D7C8),
+              Color(0xFF15A7F0),
+              Color(0xFF0B72FF),
+            ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF12D9E6).withOpacity(0.35),
+              blurRadius: 34,
+              offset: const Offset(0, 16),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 25,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.4,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AuthBackground extends StatelessWidget {
+  const _AuthBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment(0, -0.42),
+              radius: 0.95,
+              colors: [
+                Color(0xFF082548),
+                Color(0xFF04101F),
+                Color(0xFF020710),
+              ],
+              stops: [0.0, 0.48, 1.0],
+            ),
+          ),
+        ),
+
+        Positioned(
+          top: 115,
+          left: -70,
+          right: -70,
+          child: Container(
+            height: 360,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0xFF12D9E6).withOpacity(0.2),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF12D9E6).withOpacity(0.08),
+                  blurRadius: 80,
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        Positioned.fill(
+          child: CustomPaint(
+            painter: _StarsPainter(),
+          ),
+        ),
+
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 260,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                colors: [
+                  const Color(0xFF020710),
+                  const Color(0xFF020710).withOpacity(0.72),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _StarsPainter extends CustomPainter {
+  const _StarsPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF12D9E6).withOpacity(0.55)
+      ..strokeWidth = 1.4
+      ..style = PaintingStyle.fill;
+
+    final points = [
+      Offset(size.width * 0.12, size.height * 0.11),
+      Offset(size.width * 0.22, size.height * 0.19),
+      Offset(size.width * 0.39, size.height * 0.06),
+      Offset(size.width * 0.58, size.height * 0.10),
+      Offset(size.width * 0.74, size.height * 0.18),
+      Offset(size.width * 0.88, size.height * 0.13),
+      Offset(size.width * 0.19, size.height * 0.86),
+      Offset(size.width * 0.44, size.height * 0.91),
+      Offset(size.width * 0.72, size.height * 0.88),
+      Offset(size.width * 0.91, size.height * 0.82),
+    ];
+
+    for (final point in points) {
+      canvas.drawCircle(point, 1.5, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _CityLinePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final linePaint = Paint()
+      ..color = const Color(0xFF12D9E6).withOpacity(0.22)
+      ..strokeWidth = 1.6
+      ..style = PaintingStyle.stroke;
+
+    final fillPaint = Paint()
+      ..color = const Color(0xFF12D9E6).withOpacity(0.04)
+      ..style = PaintingStyle.fill;
+
+    final baseY = size.height * 0.82;
+
+    final path = Path()
+      ..moveTo(0, baseY)
+      ..lineTo(size.width, baseY);
+
+    canvas.drawPath(path, linePaint);
+
+    void building(double x, double w, double h) {
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(x, baseY - h, w, h),
+        const Radius.circular(2),
+      );
+      canvas.drawRRect(rect, fillPaint);
+      canvas.drawRRect(rect, linePaint);
+
+      for (double yy = baseY - h + 14; yy < baseY - 8; yy += 16) {
+        canvas.drawLine(
+          Offset(x + w * 0.28, yy),
+          Offset(x + w * 0.72, yy),
+          linePaint,
+        );
+      }
+    }
+
+    building(size.width * 0.08, 38, 56);
+    building(size.width * 0.22, 54, 86);
+    building(size.width * 0.67, 45, 74);
+    building(size.width * 0.76, 58, 106);
+
+    final bridge = Path()
+      ..moveTo(size.width * 0.30, baseY)
+      ..quadraticBezierTo(
+        size.width * 0.42,
+        baseY - 78,
+        size.width * 0.54,
+        baseY,
+      );
+    canvas.drawPath(bridge, linePaint);
+
+    canvas.drawLine(
+      Offset(size.width * 0.31, baseY),
+      Offset(size.width * 0.31, baseY - 76),
+      linePaint,
+    );
+    canvas.drawLine(
+      Offset(size.width * 0.53, baseY),
+      Offset(size.width * 0.53, baseY - 76),
+      linePaint,
+    );
+
+    final bus = RRect.fromRectAndRadius(
+      Rect.fromLTWH(size.width * 0.47, baseY - 30, 70, 30),
+      const Radius.circular(8),
+    );
+    canvas.drawRRect(bus, fillPaint);
+    canvas.drawRRect(bus, linePaint);
+    canvas.drawCircle(
+      Offset(size.width * 0.49, baseY),
+      5,
+      linePaint,
+    );
+    canvas.drawCircle(
+      Offset(size.width * 0.58, baseY),
+      5,
+      linePaint,
+    );
+
+    final pinCenter = Offset(size.width * 0.90, baseY - 42);
+    final pinPath = Path()
+      ..addOval(Rect.fromCircle(center: pinCenter, radius: 22))
+      ..moveTo(pinCenter.dx, pinCenter.dy + 34)
+      ..lineTo(pinCenter.dx - 12, pinCenter.dy + 16)
+      ..lineTo(pinCenter.dx + 12, pinCenter.dy + 16)
+      ..close();
+    canvas.drawPath(pinPath, linePaint);
+    canvas.drawCircle(pinCenter, 8, linePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}

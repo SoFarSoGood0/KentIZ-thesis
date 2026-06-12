@@ -1,0 +1,1581 @@
+import React, { useMemo, useState } from "react";
+import {
+  AlertTriangle,
+  Bell,
+  Building2,
+  CalendarDays,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  ClipboardList,
+  Eye,
+  FileCheck2,
+  FileText,
+  Gauge,
+  Home,
+  Layers3,
+  LocateFixed,
+  LogOut,
+  MapPinned,
+  Menu,
+  Search,
+  Settings,
+  ShieldCheck,
+  Trash2,
+  Users,
+  X,
+} from "lucide-react";
+
+// Tek dosyalık Kentİz Admin Dashboard
+// Kullanım: src/app/pages/AdminDashboard.tsx olarak koyup route içinde bu componenti göster.
+
+const reports = [
+  {
+    id: "RP-1042",
+    category: "Yol Çukuru",
+    location: "Aşağı Kayabaşı",
+    confidence: 96,
+    priority: "Yüksek",
+    status: "İncelemede",
+    time: "12 dk önce",
+    note: "Araçlar geçerken ciddi sarsıntı oluyor.",
+    team: "Yol Bakım Ekibi",
+    duplicate: 14,
+    createdAt: "23.05.2026 / 14:42",
+    icon: AlertTriangle,
+    accent: "amber",
+  },
+  {
+    id: "RP-1041",
+    category: "Çöp Yığını",
+    location: "Selçuk Mah.",
+    confidence: 93,
+    priority: "Orta",
+    status: "Yeni",
+    time: "18 dk önce",
+    note: "Konteyner etrafında yoğun çöp birikmiş.",
+    team: "Temizlik Ekibi",
+    duplicate: 9,
+    createdAt: "23.05.2026 / 14:36",
+    icon: Trash2,
+    accent: "green",
+  },
+  {
+    id: "RP-1040",
+    category: "Kaldırım Hasarı",
+    location: "Yenice Mah.",
+    confidence: 89,
+    priority: "Orta",
+    status: "Ekip Bekliyor",
+    time: "31 dk önce",
+    note: "Kaldırım taşları kırılmış ve geçiş zorlaşmış.",
+    team: "Kaldırım Bakım Ekibi",
+    duplicate: 18,
+    createdAt: "23.05.2026 / 14:23",
+    icon: Building2,
+    accent: "purple",
+  },
+  {
+    id: "RP-1039",
+    category: "Yol Çukuru",
+    location: "Merkez Cad.",
+    confidence: 97,
+    priority: "Kritik",
+    status: "Yeni",
+    time: "47 dk önce",
+    note: "Ana yolda büyük çukur oluşmuş.",
+    team: "Yol Bakım Ekibi",
+    duplicate: 6,
+    createdAt: "23.05.2026 / 14:07",
+    icon: AlertTriangle,
+    accent: "red",
+  },
+  {
+    id: "RP-1038",
+    category: "Çöp Yığını",
+    location: "Bahçelievler",
+    confidence: 87,
+    priority: "Düşük",
+    status: "Onaylandı",
+    time: "1 sa önce",
+    note: "Park kenarında çöp birikimi var.",
+    team: "Temizlik Ekibi",
+    duplicate: 21,
+    createdAt: "23.05.2026 / 13:42",
+    icon: Trash2,
+    accent: "green",
+  },
+];
+
+const activities = [
+  ["14:42", "RP-1042 onaylandı"],
+  ["14:45", "RP-1042 Yol Bakım Ekibi'ne atandı"],
+  ["14:47", "RP-1041 incelemeye alındı"],
+  ["14:51", "RP-1038 çözüldü olarak işaretlendi"],
+  ["14:55", "Proof kaydı oluşturuldu"],
+  ["14:57", "RP-1037 reddedildi"],
+];
+
+const teamWorkloads = [
+  { name: "Yol Bakım Ekibi", active: 8, done: 11, icon: AlertTriangle, color: "#f59e0b" },
+  { name: "Temizlik Ekibi", active: 5, done: 14, icon: Trash2, color: "#22c55e" },
+  { name: "Kaldırım Bakım Ekibi", active: 4, done: 9, icon: Building2, color: "#f59e0b" },
+];
+
+const navItems = [
+  { label: "Genel Bakış", icon: Home, active: true },
+  { label: "Rapor Kuyruğu", icon: FileText },
+  { label: "Harita", icon: MapPinned },
+  { label: "Ekip Atamaları", icon: Users },
+  { label: "Onaylananlar", icon: CheckCircle2 },
+  { label: "Reddedilenler", icon: X },
+  { label: "Proof Kayıtları", icon: ShieldCheck },
+  { label: "Ayarlar", icon: Settings },
+];
+
+function cls(...classes: Array<string | false | null | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function StatusBadge({ value }: { value: string }) {
+  const tone =
+    value === "Yeni"
+      ? "badge-cyan"
+      : value === "İncelemede"
+      ? "badge-blue"
+      : value === "Onaylandı"
+      ? "badge-green"
+      : value === "Ekip Bekliyor"
+      ? "badge-purple"
+      : "badge-muted";
+
+  return <span className={cls("ktz-badge", tone)}>{value}</span>;
+}
+
+function PriorityBadge({ value }: { value: string }) {
+  const tone =
+    value === "Kritik"
+      ? "priority-critical"
+      : value === "Yüksek"
+      ? "priority-high"
+      : value === "Orta"
+      ? "priority-mid"
+      : "priority-low";
+
+  return <span className={cls("priority-badge", tone)}>{value}</span>;
+}
+
+function KpiCard({ icon: Icon, title, value, note, tone }: any) {
+  return (
+    <article className="kpi-card">
+      <div className={cls("kpi-icon", tone)}>
+        <Icon size={30} />
+      </div>
+      <div>
+        <p>{title}</p>
+        <strong>{value}</strong>
+        <span>{note}</span>
+      </div>
+    </article>
+  );
+}
+
+function MiniLogo() {
+  return (
+    <div className="brand-lockup">
+      <div className="brand-pin">
+        <div className="pin-city">
+          <span />
+          <span />
+          <span />
+        </div>
+      </div>
+      <div>
+        <strong>Kentİz</strong>
+        <span>YÖNETİM MERKEZİ</span>
+      </div>
+    </div>
+  );
+}
+
+export default function AdminDashboard() {
+  const [selectedId, setSelectedId] = useState("RP-1042");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const selected = useMemo(() => reports.find((r) => r.id === selectedId) || reports[0], [selectedId]);
+  const SelectedIcon = selected.icon;
+
+  return (
+    <div className="ktz-admin-shell">
+      <style>{styles}</style>
+
+      <aside className={cls("sidebar", sidebarOpen && "sidebar-open")}>
+        <div>
+          <MiniLogo />
+          <nav className="nav-list">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button key={item.label} className={cls("nav-item", item.active && "active")} type="button">
+                  <Icon size={18} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        <div className="sidebar-bottom">
+          <div className="lamp-mini" />
+          <div className="admin-profile">
+            <div className="avatar-ring">
+              <Users size={21} />
+            </div>
+            <div>
+              <strong>Admin</strong>
+              <span>Yönetici</span>
+            </div>
+            <ChevronDown size={16} />
+          </div>
+        </div>
+      </aside>
+
+      <main className="dashboard-main">
+        <header className="topbar">
+          <button className="mobile-menu" onClick={() => setSidebarOpen((v) => !v)} type="button">
+            <Menu size={20} />
+          </button>
+
+          <div className="page-title">
+            <h1>Genel Bakış</h1>
+            <p>Kentİz Yönetim Merkezi</p>
+          </div>
+
+          <label className="search-box">
+            <Search size={20} />
+            <input placeholder="Rapor ID, mahalle veya kategori ara..." />
+          </label>
+
+          <div className="top-actions">
+            <button className="notification" type="button">
+              <Bell size={22} />
+              <span>3</span>
+            </button>
+            <button className="profile-btn" type="button">
+              <div className="profile-circle">
+                <Users size={22} />
+              </div>
+              <div>
+                <strong>Admin</strong>
+                <span>Yönetici</span>
+              </div>
+              <ChevronDown size={16} />
+            </button>
+          </div>
+        </header>
+
+        <section className="kpi-grid">
+          <KpiCard icon={ClipboardList} title="Bekleyen Raporlar" value="124" note="Son 24 saatte +18 ↗" tone="cyan" />
+          <KpiCard
+            icon={AlertTriangle}
+            title="Yüksek Öncelikli"
+            value="17"
+            note="6 yol çukuru · 8 çöp yığını · 3 kaldırım"
+            tone="amber"
+          />
+          <KpiCard icon={ShieldCheck} title="Ortalama AI Güven Skoru" value="%91.4" note="Son 50 rapor ortalaması" tone="cyan" />
+          <KpiCard icon={CheckCircle2} title="Bugün Çözülen" value="36" note="Dün: 28 ↗" tone="green" />
+        </section>
+
+        <section className="content-grid">
+          <div className="panel reports-panel">
+            <div className="panel-head">
+              <div>
+                <h2>Rapor Kuyruğu</h2>
+                <p>Yeni gelen vatandaş bildirimleri</p>
+              </div>
+              <button type="button">Tüm raporları görüntüle →</button>
+            </div>
+
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Kategori</th>
+                    <th>Konum</th>
+                    <th>Güven Skoru</th>
+                    <th>Öncelik</th>
+                    <th>Durum</th>
+                    <th>Zaman</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reports.map((report) => {
+                    const Icon = report.icon;
+                    return (
+                      <tr
+                        key={report.id}
+                        className={cls(selectedId === report.id && "selected-row")}
+                        onClick={() => setSelectedId(report.id)}
+                      >
+                        <td>{report.id}</td>
+                        <td>
+                          <span className="category-cell">
+                            <Icon size={19} />
+                            {report.category}
+                          </span>
+                        </td>
+                        <td>{report.location}</td>
+                        <td className="confidence">%{report.confidence}</td>
+                        <td>
+                          <PriorityBadge value={report.priority} />
+                        </td>
+                        <td>
+                          <StatusBadge value={report.status} />
+                        </td>
+                        <td>{report.time}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <aside className="panel detail-panel">
+            <div className="panel-head">
+              <div>
+                <h2>Seçili Rapor Detayı</h2>
+                <p>Doğrulama, kategori ve ekip önerisi</p>
+              </div>
+              <span className="report-id-pill">{selected.id}</span>
+            </div>
+
+            <div className="detail-image">
+              <div className="pothole-scene">
+                <span className="detect-box">{selected.category} · %{selected.confidence}</span>
+              </div>
+            </div>
+
+            <div className="thumb-row">
+              <span className="thumb active" />
+              <span className="thumb" />
+              <span className="thumb" />
+              <span className="thumb" />
+            </div>
+
+            <div className="detail-info-grid">
+              <div className="detail-line">
+                <Layers3 size={16} />
+                <span>Kategori</span>
+                <strong>{selected.category}</strong>
+              </div>
+              <div className="detail-line">
+                <ShieldCheck size={16} />
+                <span>AI Güven Skoru</span>
+                <strong>%{selected.confidence}.2</strong>
+              </div>
+              <div className="detail-line">
+                <LocateFixed size={16} />
+                <span>Konum Doğrulama</span>
+                <strong className="success">Başarılı</strong>
+              </div>
+              <div className="detail-line">
+                <Gauge size={16} />
+                <span>Benzer Rapor Olasılığı</span>
+                <strong>%{selected.duplicate}</strong>
+              </div>
+              <div className="detail-line wide">
+                <CalendarDays size={16} />
+                <span>Oluşturulma</span>
+                <strong>{selected.createdAt}</strong>
+              </div>
+            </div>
+
+            <div className="detail-bottom">
+              <div>
+                <span>Vatandaş Notu</span>
+                <p>“{selected.note}”</p>
+              </div>
+              <div>
+                <span>Konum</span>
+                <p>{selected.location}</p>
+                <button type="button">Haritada göster</button>
+              </div>
+              <div className="team-select">
+                <span>Önerilen Ekip</span>
+                <button type="button">
+                  <SelectedIcon size={17} /> {selected.team} <ChevronDown size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="decision-row">
+              <button className="approve" type="button">
+                <Check size={18} /> Onayla
+              </button>
+              <button className="reject" type="button">
+                <X size={18} /> Reddet
+              </button>
+              <button className="assign" type="button">
+                <Users size={18} /> Ekip Ata
+              </button>
+              <button className="view" type="button">
+                <Eye size={18} /> Detay Gör
+              </button>
+            </div>
+          </aside>
+        </section>
+
+        <section className="lower-grid">
+          <div className="panel map-panel">
+            <div className="panel-head compact">
+              <div>
+                <h2>Sorun Yoğunluk Haritası</h2>
+                <p>Son 7 gün içindeki rapor yoğunluğu</p>
+              </div>
+              <button type="button">+</button>
+            </div>
+            <div className="heatmap">
+              <div className="map-list">
+                <div>Aşağı Kayabaşı <strong>12</strong></div>
+                <div>Selçuk Mah. <strong>9</strong></div>
+                <div>Yenice Mah. <strong>7</strong></div>
+                <div>Bahçelievler <strong>5</strong></div>
+              </div>
+              <span className="hotspot h1" />
+              <span className="hotspot h2" />
+              <span className="hotspot h3" />
+              <span className="hotspot h4" />
+              <span className="hotspot h5" />
+            </div>
+          </div>
+
+          <div className="panel chart-panel">
+            <div className="panel-head compact">
+              <div>
+                <h2>Kategori Dağılımı</h2>
+                <p>Toplam 111 rapor</p>
+              </div>
+            </div>
+            <div className="donut-wrap">
+              <div className="donut">
+                <div>
+                  <strong>111</strong>
+                  <span>Toplam</span>
+                </div>
+              </div>
+              <div className="legend">
+                <div><i className="c1" /> Yol Çukuru <strong>46 · %41.4</strong></div>
+                <div><i className="c2" /> Çöp Yığını <strong>38 · %34.2</strong></div>
+                <div><i className="c3" /> Kaldırım Hasarı <strong>27 · %24.4</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div className="panel workload-panel">
+            <div className="panel-head compact">
+              <div>
+                <h2>Ekip İş Yükü</h2>
+                <p>Aktif ve tamamlanan görevler</p>
+              </div>
+            </div>
+            <div className="team-list">
+              {teamWorkloads.map((team) => {
+                const Icon = team.icon;
+                return (
+                  <div className="team-row" key={team.name}>
+                    <Icon color={team.color} size={25} />
+                    <div>
+                      <strong>{team.name}</strong>
+                      <span>Aktif görev</span>
+                    </div>
+                    <b>{team.active}</b>
+                    <div className="team-progress">
+                      <span style={{ width: `${team.done * 6}%` }} />
+                    </div>
+                    <b>{team.done}</b>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="panel activity-panel">
+            <div className="panel-head compact">
+              <div>
+                <h2>Aktivite Geçmişi</h2>
+                <p>Son yönetici işlemleri</p>
+              </div>
+            </div>
+            <div className="activity-list">
+              {activities.map(([time, text]) => (
+                <div key={time + text}>
+                  <span>{time}</span>
+                  <p>{text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="panel proof-panel">
+          <div className="proof-icon">
+            <FileCheck2 size={28} />
+          </div>
+          <div>
+            <h2>Proof / Kayıt Zinciri</h2>
+            <p>Kayıt Hash</p>
+            <strong>0xA81F...94B2</strong>
+          </div>
+          <div>
+            <p>Kayıt ID</p>
+            <strong>KTZ-2026-1042</strong>
+          </div>
+          <div>
+            <p>Durum</p>
+            <strong className="success">Doğrulandı ✓</strong>
+          </div>
+          <div>
+            <p>Son İşlem</p>
+            <strong>Onay</strong>
+          </div>
+          <button type="button">Tüm kanıt kayıtlarını görüntüle →</button>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+const styles = `
+  :root {
+    --bg: #020811;
+    --bg-soft: #061422;
+    --panel: rgba(7, 22, 34, 0.72);
+    --panel-strong: rgba(8, 28, 43, 0.86);
+    --line: rgba(34, 211, 238, 0.18);
+    --line-strong: rgba(34, 211, 238, 0.32);
+    --text: #f4f8fb;
+    --muted: #aab8c2;
+    --muted-2: #6f8290;
+    --cyan: #22d3ee;
+    --cyan-2: #0891b2;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --purple: #8b5cf6;
+  }
+
+  * { box-sizing: border-box; }
+
+  html,
+  body {
+    margin: 0;
+    background: #020811;
+    overflow-x: hidden;
+  }
+
+  button, input {
+    font: inherit;
+  }
+
+  .ktz-admin-shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    color: var(--text);
+    background:
+      radial-gradient(circle at 22% 18%, rgba(34, 211, 238, 0.10), transparent 26%),
+      radial-gradient(circle at 88% 0%, rgba(245, 158, 11, 0.08), transparent 22%),
+      linear-gradient(135deg, #020811 0%, #03111c 48%, #020711 100%);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    overflow-x: hidden;
+  }
+
+  .ktz-admin-shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,.13) .7px, transparent .7px);
+    background-size: 21px 21px;
+    opacity: .045;
+    mask-image: radial-gradient(circle at center, black, transparent 75%);
+    z-index: 0;
+  }
+
+  .sidebar,
+  .dashboard-main {
+    position: relative;
+    z-index: 1;
+  }
+
+  .sidebar {
+    min-height: 100vh;
+    padding: 20px 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-right: 1px solid rgba(34, 211, 238, 0.12);
+    background:
+      linear-gradient(180deg, rgba(3, 15, 25, .96), rgba(2, 8, 17, .96)),
+      radial-gradient(circle at 50% 85%, rgba(245, 158, 11, .18), transparent 24%);
+    box-shadow: 14px 0 50px rgba(0,0,0,.24);
+  }
+
+  .brand-lockup {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 26px;
+  }
+
+  .brand-lockup strong {
+    display: block;
+    color: #fb923c;
+    font-size: 25px;
+    line-height: .9;
+    letter-spacing: -0.07em;
+  }
+
+  .brand-lockup span {
+    display: block;
+    margin-top: 6px;
+    color: #8495a5;
+    font-size: 9px;
+    letter-spacing: .12em;
+  }
+
+  .brand-pin {
+    width: 44px;
+    height: 52px;
+    border-radius: 22px 22px 25px 25px;
+    background: linear-gradient(145deg, #ff8a22, #39142a 50%, #102e3c);
+    position: relative;
+    box-shadow: 0 14px 30px rgba(251, 146, 60, .15);
+    overflow: hidden;
+    flex: 0 0 auto;
+  }
+
+  .brand-pin::after {
+    content: "";
+    position: absolute;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    right: 9px;
+    top: 8px;
+    background: #ffc85a;
+  }
+
+  .pin-city {
+    position: absolute;
+    left: 9px;
+    bottom: 10px;
+    display: flex;
+    align-items: end;
+    gap: 3px;
+  }
+
+  .pin-city span {
+    display: block;
+    width: 7px;
+    background: #20d3e5;
+    border-radius: 2px 2px 0 0;
+  }
+
+  .pin-city span:nth-child(1) { height: 21px; }
+  .pin-city span:nth-child(2) { height: 29px; }
+  .pin-city span:nth-child(3) { height: 17px; }
+
+  .nav-list {
+    display: grid;
+    gap: 7px;
+  }
+
+  .nav-item {
+    height: 42px;
+    border: 0;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    background: transparent;
+    color: #d4dde5;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 650;
+    text-align: left;
+    transition: .22s ease;
+  }
+
+  .nav-item svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .nav-item:hover,
+  .nav-item.active {
+    color: #22d3ee;
+    background: linear-gradient(90deg, rgba(34,211,238,.20), rgba(34,211,238,.06));
+    box-shadow: inset 3px 0 0 rgba(34,211,238,.72), 0 12px 30px rgba(34,211,238,.07);
+  }
+
+  .sidebar-bottom {
+    display: grid;
+    gap: 14px;
+  }
+
+  .lamp-mini {
+    height: 160px;
+    border-radius: 18px;
+    background:
+      radial-gradient(circle at 50% 72%, rgba(245, 158, 11, .40), transparent 18%),
+      linear-gradient(180deg, transparent, rgba(245,158,11,.08)),
+      url("data:image/svg+xml,%3Csvg width='200' height='240' viewBox='0 0 200 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M100 0V145' stroke='%23a16207' stroke-width='2'/%3E%3Cpath d='M58 138h84c-5-40-27-62-42-62s-37 22-42 62z' fill='%23080d12' stroke='%23334155'/%3E%3Cpath d='M68 142h64c-8 15-18 22-32 22s-24-7-32-22z' fill='%23f59e0b' opacity='.42'/%3E%3C/svg%3E") center bottom / 110px 154px no-repeat;
+    opacity: .86;
+  }
+
+  .admin-profile,
+  .profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .admin-profile {
+    padding: 11px;
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 12px;
+    background: rgba(255,255,255,.035);
+  }
+
+  .admin-profile strong,
+  .profile-btn strong {
+    display: block;
+    font-size: 13px;
+  }
+
+  .admin-profile span,
+  .profile-btn span {
+    display: block;
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .avatar-ring,
+  .profile-circle {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.38);
+    color: white;
+    flex: 0 0 auto;
+  }
+
+  .dashboard-main {
+    padding: 20px 24px 28px;
+    min-width: 0;
+  }
+
+  .topbar {
+    display: grid;
+    grid-template-columns: auto minmax(190px, 1fr) minmax(280px, 460px) auto;
+    gap: 18px;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  .mobile-menu {
+    display: none;
+  }
+
+  .page-title h1 {
+    margin: 0;
+    font-size: 22px;
+    letter-spacing: -0.045em;
+    line-height: 1.06;
+  }
+
+  .page-title p {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .search-box {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    border-radius: 10px;
+    background: rgba(8, 24, 37, .72);
+    border: 1px solid rgba(34,211,238,.16);
+  }
+
+  .search-box svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .search-box input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    color: var(--text);
+    background: transparent;
+    font-size: 13px;
+  }
+
+  .search-box input::placeholder {
+    color: #7f91a0;
+  }
+
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .notification,
+  .profile-btn,
+  .mobile-menu {
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .notification {
+    position: relative;
+  }
+
+  .notification svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .notification span {
+    position: absolute;
+    right: -7px;
+    top: -8px;
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #f59e0b;
+    color: #111827;
+    font-size: 10px;
+    font-weight: 900;
+  }
+
+  .profile-btn {
+    padding-left: 16px;
+    border-left: 1px solid rgba(255,255,255,.12);
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .kpi-card,
+  .panel {
+    border: 1px solid var(--line);
+    background:
+      radial-gradient(circle at 20% 0%, rgba(34,211,238,.08), transparent 32%),
+      var(--panel);
+    box-shadow: 0 14px 50px rgba(0,0,0,.22);
+    backdrop-filter: blur(18px) saturate(130%);
+  }
+
+  .kpi-card {
+    min-height: 112px;
+    border-radius: 12px;
+    padding: 17px;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .kpi-icon {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+  }
+
+  .kpi-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .kpi-icon.cyan { color: #22d3ee; background: rgba(34,211,238,.14); }
+  .kpi-icon.amber { color: #f59e0b; background: rgba(245,158,11,.14); }
+  .kpi-icon.green { color: #22c55e; background: rgba(34,197,94,.14); }
+
+  .kpi-card p {
+    margin: 0;
+    color: #d7e0e7;
+    font-size: 12.5px;
+  }
+
+  .kpi-card strong {
+    display: block;
+    margin-top: 6px;
+    color: white;
+    font-size: 34px;
+    line-height: .98;
+    letter-spacing: -0.06em;
+  }
+
+  .kpi-card span {
+    display: block;
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: 11.5px;
+    line-height: 1.35;
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(390px, .95fr);
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .panel {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .panel-head {
+    min-height: 50px;
+    padding: 14px 14px 12px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+  }
+
+  .panel-head.compact {
+    border-bottom: 0;
+    padding-bottom: 8px;
+  }
+
+  .panel-head h2 {
+    margin: 0;
+    color: white;
+    font-size: 14.5px;
+    letter-spacing: -0.03em;
+  }
+
+  .panel-head p {
+    margin: 5px 0 0;
+    color: var(--muted);
+    font-size: 11.5px;
+  }
+
+  .panel-head button {
+    border: 0;
+    background: transparent;
+    color: #9bdcf0;
+    cursor: pointer;
+    font-size: 11.5px;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 690px;
+  }
+
+  th,
+  td {
+    padding: 12px 13px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,.065);
+    font-size: 11.5px;
+    white-space: nowrap;
+  }
+
+  th {
+    color: #98a8b6;
+    font-weight: 600;
+  }
+
+  td {
+    color: #dde8ee;
+  }
+
+  tbody tr {
+    cursor: pointer;
+    transition: background .18s ease;
+  }
+
+  tbody tr:hover,
+  tbody tr.selected-row {
+    background: rgba(255,255,255,.055);
+  }
+
+  tbody td:first-child {
+    color: white;
+    font-weight: 800;
+  }
+
+  .category-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .category-cell svg {
+    width: 16px;
+    height: 16px;
+    color: #f59e0b;
+  }
+
+  .confidence {
+    color: #22d3ee;
+    font-weight: 800;
+  }
+
+  .priority-badge,
+  .ktz-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24px;
+    padding: 0 8px;
+    border-radius: 6px;
+    font-size: 10.5px;
+    font-weight: 750;
+  }
+
+  .priority-critical { color: #fecaca; background: rgba(239,68,68,.17); }
+  .priority-high { color: #fed7aa; background: rgba(249,115,22,.18); }
+  .priority-mid { color: #fde68a; background: rgba(245,158,11,.18); }
+  .priority-low { color: #cbd5e1; background: rgba(148,163,184,.16); }
+
+  .badge-cyan { color: #67e8f9; background: rgba(34,211,238,.13); }
+  .badge-blue { color: #93c5fd; background: rgba(59,130,246,.16); }
+  .badge-green { color: #86efac; background: rgba(34,197,94,.16); }
+  .badge-purple { color: #c4b5fd; background: rgba(139,92,246,.18); }
+  .badge-muted { color: #cbd5e1; background: rgba(148,163,184,.16); }
+
+  .detail-panel {
+    padding-bottom: 0;
+  }
+
+  .report-id-pill {
+    min-height: 25px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 6px;
+    color: #22d3ee;
+    background: rgba(34,211,238,.14);
+    font-weight: 800;
+    font-size: 10.5px;
+  }
+
+  .detail-image {
+    padding: 0 14px;
+  }
+
+  .pothole-scene {
+    position: relative;
+    height: 158px;
+    border-radius: 8px;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 47% 62%, rgba(0,0,0,.95) 0 12%, rgba(50,50,50,.85) 13% 19%, transparent 20%),
+      linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.72)),
+      repeating-linear-gradient(12deg, #222 0 10px, #171717 10px 20px);
+    border: 1px solid rgba(255,255,255,.08);
+  }
+
+  .pothole-scene::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(120deg, transparent 0 42%, rgba(255,255,255,.10) 45%, transparent 48%),
+      radial-gradient(circle at 48% 62%, rgba(255,255,255,.18), transparent 10%);
+    opacity: .7;
+  }
+
+  .detect-box {
+    position: absolute;
+    left: 14px;
+    bottom: 12px;
+    border: 1px solid #22d3ee;
+    color: #cfffff;
+    background: rgba(2, 8, 17, .62);
+    backdrop-filter: blur(10px);
+    border-radius: 6px;
+    padding: 7px 9px;
+    font-size: 10.5px;
+    font-weight: 800;
+  }
+
+  .thumb-row {
+    display: flex;
+    gap: 7px;
+    padding: 10px 14px;
+  }
+
+  .thumb {
+    width: 54px;
+    height: 34px;
+    border-radius: 6px;
+    background:
+      radial-gradient(circle at 45% 58%, #0a0a0a, transparent 20%),
+      repeating-linear-gradient(12deg, #333 0 8px, #191919 8px 16px);
+    border: 1px solid rgba(255,255,255,.1);
+    opacity: .75;
+  }
+
+  .thumb.active {
+    border-color: #22d3ee;
+    box-shadow: 0 0 0 2px rgba(34,211,238,.18);
+    opacity: 1;
+  }
+
+  .detail-info-grid {
+    margin: 0 14px;
+    padding: 11px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 7px 10px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.025);
+    border: 1px solid rgba(255,255,255,.07);
+  }
+
+  .detail-line {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 8px;
+    min-height: 29px;
+    color: #cbd5e1;
+    font-size: 10.5px;
+  }
+
+  .detail-line svg {
+    width: 14px;
+    height: 14px;
+    color: #22d3ee;
+  }
+
+  .detail-line strong {
+    color: #f8fafc;
+    font-weight: 700;
+  }
+
+  .detail-line.wide {
+    grid-column: 1 / -1;
+  }
+
+  .success {
+    color: #4ade80 !important;
+  }
+
+  .detail-bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.1fr;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .detail-bottom span {
+    color: #cbd5e1;
+    font-size: 10.5px;
+    font-weight: 800;
+  }
+
+  .detail-bottom p {
+    margin: 6px 0 0;
+    color: #dce7ee;
+    font-size: 11.5px;
+    line-height: 1.35;
+  }
+
+  .detail-bottom button,
+  .team-select button {
+    margin-top: 5px;
+    border: 0;
+    background: transparent;
+    color: #22d3ee;
+    cursor: pointer;
+    padding: 0;
+    font-weight: 700;
+    font-size: 11.5px;
+  }
+
+  .team-select button {
+    width: 100%;
+    min-height: 38px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    color: #dce7ee;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+  }
+
+  .decision-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 9px;
+    padding: 14px;
+    border-top: 1px solid rgba(255,255,255,.07);
+  }
+
+  .decision-row button {
+    min-height: 38px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 11.5px;
+    font-weight: 800;
+  }
+
+  .decision-row button svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .approve { border: 0; color: white; background: linear-gradient(135deg, #22d3ee, #0891b2); }
+  .reject { color: #fecaca; background: rgba(239,68,68,.14); border: 1px solid rgba(239,68,68,.35); }
+  .assign { color: #fde68a; background: rgba(245,158,11,.13); border: 1px solid rgba(245,158,11,.34); }
+  .view { color: #dce7ee; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.11); }
+
+  .lower-grid {
+    display: grid;
+    grid-template-columns: 1.15fr .75fr 1fr .95fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .heatmap {
+    position: relative;
+    margin: 0 10px 10px;
+    height: 185px;
+    border-radius: 8px;
+    overflow: hidden;
+    background:
+      linear-gradient(rgba(34,211,238,.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34,211,238,.08) 1px, transparent 1px),
+      radial-gradient(circle at 60% 48%, rgba(34,211,238,.12), transparent 24%),
+      #06131f;
+    background-size: 30px 30px, 30px 30px, auto, auto;
+    border: 1px solid rgba(255,255,255,.075);
+  }
+
+  .map-list {
+    position: absolute;
+    left: 12px;
+    top: 34px;
+    width: 142px;
+    padding: 11px;
+    display: grid;
+    gap: 9px;
+    color: #dce7ee;
+    font-size: 10.5px;
+    border-radius: 8px;
+    background: rgba(2,8,17,.62);
+    backdrop-filter: blur(12px);
+  }
+
+  .map-list div {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .hotspot {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #f59e0b;
+    box-shadow: 0 0 0 10px rgba(245,158,11,.12), 0 0 28px rgba(245,158,11,.6);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .h1 { left: 51%; top: 27%; }
+  .h2 { left: 63%; top: 40%; background: #ef4444; box-shadow: 0 0 0 10px rgba(239,68,68,.12), 0 0 28px rgba(239,68,68,.6); }
+  .h3 { left: 44%; top: 54%; background: #22c55e; box-shadow: 0 0 0 10px rgba(34,197,94,.12), 0 0 28px rgba(34,197,94,.6); }
+  .h4 { left: 71%; top: 62%; }
+  .h5 { left: 58%; top: 72%; background: #22d3ee; box-shadow: 0 0 0 10px rgba(34,211,238,.12), 0 0 28px rgba(34,211,238,.6); }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: .86; }
+    50% { transform: scale(1.15); opacity: 1; }
+  }
+
+  .donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 14px 14px;
+  }
+
+  .donut {
+    width: 112px;
+    height: 112px;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: conic-gradient(#22d3ee 0 41%, #d6a24a 41% 75%, #8b5cf6 75% 100%);
+    position: relative;
+  }
+
+  .donut::after {
+    content: "";
+    position: absolute;
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    background: #06131f;
+    box-shadow: inset 0 0 20px rgba(0,0,0,.45);
+  }
+
+  .donut div {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  .donut strong,
+  .donut span {
+    display: block;
+  }
+
+  .donut strong {
+    font-size: 19px;
+  }
+
+  .donut span {
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  .legend {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .legend div {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 7px;
+    color: #dce7ee;
+    font-size: 10.5px;
+  }
+
+  .legend i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-top: 3px;
+  }
+
+  .legend strong {
+    grid-column: 2;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .c1 { background: #22d3ee; }
+  .c2 { background: #d6a24a; }
+  .c3 { background: #8b5cf6; }
+
+  .team-list,
+  .activity-list {
+    padding: 5px 14px 14px;
+    display: grid;
+    gap: 11px;
+  }
+
+  .team-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto 56px auto;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 11px;
+    border-bottom: 1px solid rgba(255,255,255,.065);
+  }
+
+  .team-row svg {
+    width: 21px;
+    height: 21px;
+  }
+
+  .team-row strong,
+  .team-row span {
+    display: block;
+  }
+
+  .team-row strong {
+    font-size: 11.5px;
+  }
+
+  .team-row span {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 10px;
+  }
+
+  .team-row b {
+    font-size: 12px;
+  }
+
+  .team-progress {
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.09);
+    overflow: hidden;
+  }
+
+  .team-progress span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #22d3ee;
+  }
+
+  .activity-list div {
+    display: grid;
+    grid-template-columns: 46px 1fr;
+    gap: 7px;
+    align-items: start;
+  }
+
+  .activity-list span {
+    color: #22d3ee;
+    font-size: 10.5px;
+  }
+
+  .activity-list p {
+    margin: 0;
+    color: #dce7ee;
+    font-size: 11.5px;
+    line-height: 1.35;
+  }
+
+  .proof-panel {
+    min-height: 78px;
+    display: grid;
+    grid-template-columns: auto 1.1fr 1fr 1fr 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px;
+  }
+
+  .proof-icon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    color: #22d3ee;
+    background: rgba(34,211,238,.13);
+  }
+
+  .proof-icon svg {
+    width: 23px;
+    height: 23px;
+  }
+
+  .proof-panel h2 {
+    margin: 0 0 6px;
+    font-size: 14px;
+  }
+
+  .proof-panel p {
+    margin: 0 0 5px;
+    color: var(--muted);
+    font-size: 10.5px;
+  }
+
+  .proof-panel strong {
+    color: white;
+    font-size: 11.5px;
+  }
+
+  .proof-panel button {
+    border: 0;
+    background: transparent;
+    color: #9bdcf0;
+    cursor: pointer;
+    font-size: 11.5px;
+  }
+
+  @media (max-width: 1320px) {
+    .ktz-admin-shell { grid-template-columns: 210px 1fr; }
+    .dashboard-main { padding: 18px; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .lower-grid { grid-template-columns: repeat(2, 1fr); }
+    .content-grid { grid-template-columns: 1fr; }
+    .detail-panel { max-width: none; }
+  }
+
+  @media (max-width: 980px) {
+    .ktz-admin-shell { grid-template-columns: 1fr; }
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 260px;
+      transform: translateX(-100%);
+      transition: transform .24s ease;
+      z-index: 10;
+    }
+    .sidebar.sidebar-open { transform: translateX(0); }
+    .dashboard-main { padding: 16px; }
+    .topbar { grid-template-columns: auto 1fr; }
+    .mobile-menu {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(255,255,255,.05);
+    }
+    .search-box,
+    .top-actions { grid-column: 1 / -1; }
+    .kpi-grid,
+    .lower-grid { grid-template-columns: 1fr; }
+    .proof-panel { grid-template-columns: 1fr; }
+    .decision-row { grid-template-columns: repeat(2, 1fr); }
+    .detail-bottom { grid-template-columns: 1fr; }
+    .detail-info-grid { grid-template-columns: 1fr; }
+  }
+`;

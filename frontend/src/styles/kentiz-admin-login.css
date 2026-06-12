@@ -1,0 +1,614 @@
+/* Kentİz Admin Login - sadece /admin/login ekranı */
+.kentiz-admin-login {
+  height: 100vh;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: #060c15;
+  background-size: auto 100%;
+  background-position: left center;
+  background-repeat: no-repeat;
+  color: #f7fbff;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 28px clamp(20px, 3.5vw, 56px);
+  transition: filter 520ms ease;
+}
+
+/* Genel hafif koyu overlay - derinlik için */
+.kentiz-admin-login::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.08) 0%, rgba(0,0,0,.04) 48%, rgba(1,6,12,.32) 100%),
+    radial-gradient(circle at 21% 28%, rgba(255,190,92,.10), transparent 24%),
+    radial-gradient(circle at 76% 45%, rgba(20,211,210,.06), transparent 26%);
+  transition: opacity 520ms ease;
+}
+
+/* Köşe vinyeti */
+.kentiz-admin-login::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,.52) 100%);
+}
+
+/* === IŞIK KAPATMA (is-dark) ===
+   backdrop-filter sadece arka plan resmine uygulanır;
+   z-index: 10 üzerindeki form kartını etkilemez. */
+.kentiz-admin-login__shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0);
+  transition: background 600ms ease, backdrop-filter 600ms ease;
+}
+
+.kentiz-admin-login.is-dark .kentiz-admin-login__shade {
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: brightness(0.18) saturate(0.35);
+}
+
+/* Sıcak ampul parıltısı - ışık açıkken */
+.kentiz-admin-login__warm-glow {
+  position: absolute;
+  left: 12%;
+  top: 4%;
+  width: 38vw;
+  height: 60vh;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(255,188,90,.28), rgba(255,188,90,.10) 38%, transparent 68%);
+  filter: blur(12px);
+  opacity: 1;
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+
+.kentiz-admin-login.is-dark .kentiz-admin-login__warm-glow {
+  opacity: 0;
+  transform: scale(.82);
+}
+
+/* === DUVAR BUTONU ===
+   Pirinç çerçeveli, bakalit yüzeyli, LED göstergeli endüstriyel push button.
+   Framer Motion ile yay fiziği basma animasyonu. */
+/* Wrapper: CSS konumlandırmayı FM'den ayırır — ilk tıkta kayma olmaz */
+.kentiz-wall-switch-wrapper {
+  position: absolute;
+  left: 22%;
+  top: 64%;
+  transform: translateX(-50%);
+  z-index: 20;
+}
+
+.kentiz-wall-switch {
+  width: 56px;
+  height: 56px;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  display: block;
+  filter:
+    drop-shadow(0 8px 22px rgba(0,0,0,.88))
+    drop-shadow(0 2px 6px rgba(0,0,0,.60));
+  transition: filter 600ms ease;
+}
+
+/* Işık söndüğünde buton da solar */
+.kentiz-admin-login.is-dark .kentiz-wall-switch {
+  filter:
+    drop-shadow(0 8px 22px rgba(0,0,0,.88))
+    drop-shadow(0 2px 6px rgba(0,0,0,.60))
+    brightness(0.28) saturate(0.4);
+}
+
+/* Dikdörtgen duvar plakası — yüzeye çıkıntılı monte */
+.kentiz-wall-switch__plate {
+  position: absolute;
+  top: -20px;
+  left: -18px;
+  right: -18px;
+  bottom: -20px;
+  border-radius: 9px;
+  background:
+    linear-gradient(165deg, rgba(255,255,255,.04) 0%, transparent 28%),
+    linear-gradient(145deg, #241e10 0%, #14100a 45%, #0c0906 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    inset 0 -1px 0 rgba(0,0,0,.55),
+    inset 1px 0 0 rgba(255,255,255,.025),
+    inset -1px 0 0 rgba(0,0,0,.45);
+}
+
+/* Üst montaj vidası */
+.kentiz-wall-switch__plate::before {
+  content: '';
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 30%, #5a4828, #2a1c0c, #181008);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.04);
+}
+
+/* Alt montaj vidası */
+.kentiz-wall-switch__plate::after {
+  content: '';
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 30%, #5a4828, #2a1c0c, #181008);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.04);
+}
+
+/* Pirinç/bakır dış bezel — konik gradyan ile metalik parlaklık */
+.kentiz-wall-switch__bezel {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 120deg at 50% 50%,
+    #c8a860 0deg,
+    #5a4020 40deg,
+    #e0c070 82deg,
+    #6a4e28 130deg,
+    #d4b060 180deg,
+    #4a3418 222deg,
+    #c8a860 264deg,
+    #5a4020 310deg,
+    #c8a860 360deg
+  );
+  box-shadow:
+    0 4px 12px rgba(0,0,0,.78),
+    0 1px 4px rgba(0,0,0,.55),
+    inset 0 2px 5px rgba(0,0,0,.55),
+    inset 0 -1px 1px rgba(255,255,255,.08);
+}
+
+/* Bakalit yüzey — koyu parlak plastik, dome vurgusu */
+.kentiz-wall-switch__face {
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 36% 26%, rgba(255,255,255,.20) 0%, transparent 38%),
+    radial-gradient(circle at 62% 72%, rgba(0,0,0,.50) 0%, transparent 30%),
+    radial-gradient(circle at 50% 50%, #2e2210, #1a1008, #0c0804);
+  box-shadow:
+    inset 0 4px 10px rgba(0,0,0,.80),
+    inset 0 -1px 3px rgba(255,255,255,.04),
+    0 1px 0 rgba(255,255,255,.03);
+}
+
+/* LED göstergesi — yüzey ortasında küçük ışık noktası */
+.kentiz-wall-switch__face::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  transition: background 350ms ease, box-shadow 350ms ease;
+}
+
+/* LED AÇIK — parlak amber */
+.kentiz-wall-switch.is-on .kentiz-wall-switch__face::after {
+  background: radial-gradient(circle at 38% 33%, #fff8a0, #ffc820, #e08000);
+  box-shadow:
+    0 0 8px rgba(255,200,40,.95),
+    0 0 20px rgba(255,165,30,.70),
+    0 0 3px rgba(255,235,90,.90);
+}
+
+/* LED KAPALI — söndürülmüş */
+.kentiz-wall-switch.is-off .kentiz-wall-switch__face::after {
+  background: radial-gradient(circle at 38% 33%, #2e1c08, #0e0804);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,.90);
+}
+
+/* Sıcak ambient ışık yayılımı */
+.kentiz-wall-switch__glow {
+  position: absolute;
+  inset: -32px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,178,30,.55) 0%, transparent 62%);
+  opacity: 0;
+  pointer-events: none;
+  filter: blur(10px);
+  transition: opacity 450ms ease;
+}
+
+.kentiz-wall-switch.is-on .kentiz-wall-switch__glow {
+  opacity: 1;
+}
+
+/* === FORM KARTI === */
+.kentiz-admin-card {
+  grid-column: 2;
+  position: relative;
+  z-index: 10;
+  justify-self: center;
+  width: min(460px, 100%);
+  border-radius: 24px;
+  padding: 30px 36px 26px;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(20,211,210,.13), transparent 28%),
+    linear-gradient(135deg, rgba(12,24,35,.84), rgba(3,8,15,.80));
+  border: 1px solid rgba(20,211,210,.34);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.06) inset,
+    0 0 58px rgba(20,211,210,.15),
+    0 28px 90px rgba(0,0,0,.55);
+  backdrop-filter: blur(24px) saturate(140%);
+  transition: box-shadow 520ms ease, border-color 520ms ease;
+}
+
+.kentiz-admin-login.is-dark .kentiz-admin-card {
+  background:
+    radial-gradient(circle at 16% 0%, rgba(20,211,210,.08), transparent 28%),
+    linear-gradient(135deg, rgba(8,16,25,.90), rgba(2,5,10,.88));
+  border-color: rgba(20,211,210,.22);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.04) inset,
+    0 0 28px rgba(20,211,210,.10),
+    0 28px 90px rgba(0,0,0,.80);
+}
+
+.kentiz-admin-card__logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.kentiz-admin-card__logo img {
+  width: min(240px, 70%);
+  height: 88px;
+  object-fit: contain;
+  object-position: center;
+  /* hue-rotate: teal(180°) → altın(~35°); beyaz arka plan etkilenmez */
+  filter:
+    hue-rotate(215deg) saturate(2.4) brightness(1.06)
+    drop-shadow(0 10px 22px rgba(190, 140, 15, .42));
+}
+
+.kentiz-admin-card h1 {
+  text-align: center;
+  font-size: clamp(22px, 1.9vw, 28px);
+  line-height: 1.05;
+  letter-spacing: -0.055em;
+  font-weight: 900;
+  margin: 0 0 8px;
+  color: #f8fbff;
+}
+
+.kentiz-admin-card__subtitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: #aeb8c6;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.kentiz-admin-card__subtitle svg {
+  color: #14d3d2;
+}
+
+.kentiz-admin-form {
+  display: grid;
+  gap: 12px;
+}
+
+.kentiz-admin-field {
+  position: relative;
+  display: block;
+}
+
+.kentiz-admin-field input {
+  width: 100%;
+  height: 52px;
+  border: 1px solid rgba(255,255,255,.13);
+  outline: none;
+  border-radius: 12px;
+  padding: 0 52px;
+  color: #f7fbff;
+  background: rgba(255,255,255,.035);
+  font-size: 15px;
+  transition: border-color 240ms ease, box-shadow 240ms ease, background 240ms ease;
+}
+
+.kentiz-admin-field input:disabled {
+  opacity: .66;
+  cursor: not-allowed;
+}
+
+.kentiz-admin-field input::placeholder {
+  color: rgba(213,225,233,.58);
+}
+
+.kentiz-admin-field input:focus {
+  border-color: rgba(20,211,210,.74);
+  background: rgba(255,255,255,.052);
+  box-shadow: 0 0 0 4px rgba(20,211,210,.085), 0 12px 28px rgba(0,0,0,.18);
+}
+
+.kentiz-admin-field__icon,
+.kentiz-admin-field__action {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(236,246,251,.76);
+}
+
+.kentiz-admin-field__icon {
+  left: 18px;
+  pointer-events: none;
+}
+
+.kentiz-admin-field__action {
+  right: 14px;
+  border: 0;
+  padding: 6px;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  opacity: .75;
+  transition: opacity 180ms ease, background 180ms ease;
+}
+
+.kentiz-admin-field__action:hover {
+  opacity: 1;
+  background: rgba(255,255,255,.07);
+}
+
+.kentiz-admin-code {
+  letter-spacing: .22em;
+  font-weight: 800;
+}
+
+.kentiz-admin-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 2px 0 0;
+  color: #c8d4dd;
+  font-size: 13px;
+}
+
+.kentiz-admin-remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.kentiz-admin-remember input {
+  display: none;
+}
+
+.kentiz-admin-remember span {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 1.5px solid rgba(20, 211, 210, .45);
+  color: transparent;
+  font-size: 11px;
+  font-weight: 900;
+  flex-shrink: 0;
+  transition: background 200ms ease, border-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
+}
+
+.kentiz-admin-remember span.is-checked {
+  background: linear-gradient(135deg, #14d3d2, #087f8c);
+  border-color: transparent;
+  color: #061014;
+  box-shadow: 0 4px 12px rgba(20, 211, 210, .28);
+}
+
+.kentiz-admin-link {
+  border: 0;
+  background: none;
+  color: #14d3d2;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.kentiz-admin-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.kentiz-admin-message {
+  border-radius: 12px;
+  padding: 10px 13px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.kentiz-admin-message.is-success {
+  color: #c8fff4;
+  background: rgba(20,211,210,.09);
+  border: 1px solid rgba(20,211,210,.18);
+}
+
+.kentiz-admin-message.is-error {
+  color: #ffe3e8;
+  background: rgba(255,95,111,.11);
+  border: 1px solid rgba(255,95,111,.18);
+}
+
+.kentiz-admin-submit,
+.kentiz-admin-secondary {
+  width: 100%;
+  border: 0;
+  cursor: pointer;
+  font-weight: 900;
+  transition: transform 240ms cubic-bezier(.19,1,.22,1), box-shadow 240ms cubic-bezier(.19,1,.22,1), opacity 180ms ease;
+}
+
+.kentiz-admin-submit:disabled,
+.kentiz-admin-secondary:disabled {
+  opacity: .64;
+  cursor: wait;
+}
+
+.kentiz-admin-submit {
+  position: relative;
+  height: 54px;
+  margin-top: 2px;
+  border-radius: 12px;
+  overflow: hidden;
+  color: #f8feff;
+  font-size: 16px;
+  background: linear-gradient(135deg, #2be1e5 0%, #16aebc 52%, #087c8a 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.32), 0 12px 30px rgba(20,211,210,.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.kentiz-admin-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.36), 0 18px 40px rgba(20,211,210,.32);
+}
+
+.kentiz-admin-submit::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.42), transparent);
+  transform: translateX(-120%);
+  transition: transform 800ms cubic-bezier(.19,1,.22,1);
+}
+
+.kentiz-admin-submit:hover:not(:disabled)::before {
+  transform: translateX(120%);
+}
+
+.kentiz-admin-submit span {
+  position: relative;
+  z-index: 1;
+}
+
+.kentiz-admin-secondary {
+  height: 44px;
+  border-radius: 10px;
+  color: #d7faff;
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.1);
+  font-size: 14px;
+}
+
+.kentiz-admin-secondary:hover:not(:disabled) {
+  background: rgba(255,255,255,.08);
+}
+
+.kentiz-admin-note {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 14px;
+  color: rgba(218,229,237,.64);
+  font-size: 12px;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.kentiz-admin-note span {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent);
+}
+
+.kentiz-admin-note p {
+  max-width: 300px;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 1120px) {
+  .kentiz-admin-login {
+    grid-template-columns: 1fr;
+    padding: 24px 20px;
+    background-position: 30% center;
+    overflow-y: auto;
+  }
+
+  .kentiz-admin-card {
+    grid-column: 1;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .kentiz-wall-switch-wrapper {
+    left: 22%;
+    top: 62%;
+  }
+}
+
+@media (max-width: 700px) {
+  .kentiz-admin-login {
+    background-position: 30% center;
+    align-items: end;
+    padding-bottom: 32px;
+  }
+
+  .kentiz-admin-login::before {
+    background: linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.72));
+  }
+
+  .kentiz-wall-switch-wrapper {
+    left: 32%;
+    top: 58%;
+  }
+
+  .kentiz-admin-card {
+    padding: 24px 20px 20px;
+    border-radius: 18px;
+  }
+
+  .kentiz-admin-card__logo img {
+    height: 72px;
+  }
+
+  .kentiz-admin-card h1 {
+    font-size: 22px;
+  }
+
+  .kentiz-admin-options {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .kentiz-admin-note {
+    grid-template-columns: 1fr;
+  }
+
+  .kentiz-admin-note span {
+    display: none;
+  }
+}

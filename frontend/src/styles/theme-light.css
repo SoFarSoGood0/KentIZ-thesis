@@ -1,0 +1,327 @@
+/* ───────────────────────────────────────────────────────────────────────
+   LIGHT THEME
+   Activated by `data-theme="light"` on <html>. Overrides the design tokens
+   used across premium.css (citizen + admin chrome) and the handful of
+   Tailwind colour utilities used directly in the pages. Dark stays default.
+   ─────────────────────────────────────────────────────────────────────── */
+
+[data-theme="light"] :is(.uc-public-shell, .admin-premium, .admin-login-view) {
+  --uc-fog: 30, 41, 59;          /* translucent surfaces become slate-on-light */
+  --uc-deep: 255, 255, 255;      /* deep neutral surfaces become white */
+  --uc-text: #0f1b2d;
+  --uc-text-2: #3b4a63;
+  --uc-muted: #5a6b82;
+  --uc-muted-2: #8593a8;
+  --uc-ink: #ffffff;
+  --uc-ink-2: #eef2f8;
+  --uc-soft: #243349;
+  --uc-bg: #e8edf6;
+  --uc-shadow: 0 18px 50px rgba(15, 35, 75, 0.10);
+  color: var(--uc-text);
+  background:
+    radial-gradient(circle at 10% 6%, rgba(45, 212, 191, 0.16), transparent 34%),
+    radial-gradient(circle at 92% 4%, rgba(99, 102, 241, 0.12), transparent 30%),
+    radial-gradient(circle at 50% 96%, rgba(244, 180, 70, 0.12), transparent 36%),
+    linear-gradient(160deg, #e7ecf6 0%, #eef2f9 46%, #e6eef0 100%);
+}
+
+/* Slightly deepen accents so they keep contrast on a light background. */
+[data-theme="light"] :is(.uc-public-shell, .admin-premium) {
+  --uc-mint: #0d9488;
+  --uc-gold: #b8860b;
+  --uc-rose: #e11d48;
+  --uc-blue: #2563eb;
+  --uc-green: #16a34a;
+}
+
+/* ── Tailwind utility overrides (only the ones used in the pages) ───────── */
+
+/* Text */
+[data-theme="light"] .text-white { color: #0f1b29; }
+[data-theme="light"] .text-slate-200 { color: #1e293b; }
+[data-theme="light"] .text-slate-300 { color: #334155; }
+[data-theme="light"] .text-slate-400 { color: #475569; }
+[data-theme="light"] .text-slate-500 { color: #64748b; }
+
+/* Accent text — deepen for readability on light */
+[data-theme="light"] :is(.text-teal-200, .text-teal-300, .text-teal-400) { color: #0f766e; }
+[data-theme="light"] :is(.text-cyan-300, .text-cyan-400) { color: #0e7490; }
+[data-theme="light"] :is(.text-emerald-300, .text-emerald-400) { color: #047857; }
+[data-theme="light"] .text-amber-300 { color: #b45309; }
+[data-theme="light"] :is(.text-red-300, .text-red-400) { color: #be123c; }
+[data-theme="light"] .text-blue-300 { color: #1d4ed8; }
+
+/* Translucent surfaces */
+[data-theme="light"] .bg-white\/5 { background-color: rgba(15, 23, 42, 0.05); }
+[data-theme="light"] .bg-white\/8 { background-color: rgba(15, 23, 42, 0.06); }
+[data-theme="light"] .bg-white\/10 { background-color: rgba(15, 23, 42, 0.07); }
+[data-theme="light"] .bg-white\/15 { background-color: rgba(15, 23, 42, 0.10); }
+[data-theme="light"] :is(.bg-slate-950, .bg-slate-950\/40, .bg-slate-950\/70) {
+  background-color: #e7edf5;
+}
+
+/* Borders */
+[data-theme="light"] .border-white\/5 { border-color: rgba(15, 23, 42, 0.08); }
+[data-theme="light"] .border-white\/8 { border-color: rgba(15, 23, 42, 0.10); }
+[data-theme="light"] .border-white\/10 { border-color: rgba(15, 23, 42, 0.12); }
+[data-theme="light"] .border-white\/15 { border-color: rgba(15, 23, 42, 0.16); }
+[data-theme="light"] .divide-white\/10 > * { border-color: rgba(15, 23, 42, 0.12); }
+
+/* ── Component surfaces (the real light redesign) ──────────────────────── */
+
+/* Cards & panels: crisp white on the tinted page, soft coloured shadow. */
+[data-theme="light"] :is(.uc-panel, .admin-panel, .admin-stat, .admin-login-card,
+  .uc-dashboard-stat, .uc-dashboard-panel) {
+  background: #ffffff;
+  border: 1px solid rgba(15, 35, 75, 0.08);
+  box-shadow: 0 12px 30px rgba(15, 35, 75, 0.08);
+  backdrop-filter: none;
+}
+[data-theme="light"] .uc-dashboard-panel,
+[data-theme="light"] .uc-dashboard-stat {
+  background: #ffffff;
+}
+
+/* Citizen navbar: white glass, brand-teal accent stripe. */
+[data-theme="light"] .uc-nav {
+  border-color: rgba(15, 35, 75, 0.08);
+  box-shadow: 0 16px 40px rgba(15, 35, 75, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+[data-theme="light"] .uc-nav::before {
+  background: linear-gradient(90deg, rgba(13, 148, 136, 0.16), rgba(45, 212, 191, 0.06) 44%, rgba(255, 255, 255, 0));
+}
+
+/* Admin sidebar: soft tinted surface (not flat white) for depth. */
+[data-theme="light"] .admin-sidebar {
+  background: linear-gradient(180deg, #ffffff 0%, #eef2fb 60%, #e9eef9 100%);
+  border-right: 1px solid rgba(15, 35, 75, 0.08);
+  box-shadow: 1px 0 26px rgba(15, 35, 75, 0.05);
+}
+
+/* Active / hover nav items pick up the brand teal. */
+[data-theme="light"] :is(.ktz-nav-item:hover, .ktz-nav-item.active,
+  .admin-menu a.is-active, .admin-menu a:hover, .admin-menu button:hover) {
+  background: rgba(13, 148, 136, 0.12);
+  color: #0f766e;
+}
+[data-theme="light"] .ktz-nav-item.active svg { color: #0f766e; }
+[data-theme="light"] .ktz-scope { color: #0d9488 !important; }
+
+/* Profile / avatar chips & cards. */
+[data-theme="light"] :is(.ktz-profile-card, .admin-topbar-user, .admin-ghost-btn) {
+  background: #ffffff;
+  border: 1px solid rgba(15, 35, 75, 0.08);
+}
+[data-theme="light"] .admin-notification-menu { background: #ffffff; }
+
+/* Primary CTA: solid, deep teal instead of the pale rainbow gradient. */
+[data-theme="light"] .uc-button-primary {
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+  color: #ffffff;
+  box-shadow: 0 14px 30px rgba(13, 148, 136, 0.32);
+}
+[data-theme="light"] .uc-button-ghost {
+  background: #ffffff;
+  border-color: rgba(15, 35, 75, 0.14);
+  color: var(--uc-text);
+}
+
+/* Inputs / fields get a defined light fill. */
+[data-theme="light"] :is(.uc-field input, .uc-field textarea, .uc-field select,
+  .ktz-filter-select, .admin-search-input, .admin-topbar-search-input, .admin-search-wrap) {
+  background: #f3f6fb;
+  border-color: rgba(15, 35, 75, 0.12);
+  color: var(--uc-text);
+}
+
+/* Map wells / dashed drop zones: light base, keep the accent tint art. */
+[data-theme="light"] .uc-user-map { background-color: #eef3f9; }
+[data-theme="light"] .admin-map-art { background-color: #eef3f9; }
+[data-theme="light"] .uc-drop-area { border-color: rgba(13, 148, 136, 0.4); }
+
+/* Soften the heavy dark shadows used on list rows / dashboard cards. */
+[data-theme="light"] :is(.uc-track-item, .admin-report-row, .uc-dashboard-report) {
+  box-shadow: 0 6px 18px rgba(15, 35, 75, 0.05);
+}
+
+/* Admin dashboard KPI cards (white via --uc-deep) — soft shadow, keep the
+   faint cyan border + teal radial tint for a touch of colour. */
+[data-theme="light"] .ktz-kpi-card {
+  box-shadow: 0 12px 30px rgba(15, 35, 75, 0.08);
+  backdrop-filter: none;
+}
+
+/* Decorative brand-teal glow stripes read as dark patches on white — soften. */
+[data-theme="light"] .uc-footer .uc-container::before {
+  background: linear-gradient(90deg, rgba(13, 148, 136, 0.14), rgba(45, 212, 191, 0.05) 48%, transparent);
+}
+[data-theme="light"] .uc-auth-modal::before {
+  background: linear-gradient(105deg, rgba(13, 148, 136, 0.14), rgba(13, 148, 136, 0.05) 28%, transparent 58%);
+}
+
+/* Status pills/badges hardcode pale accent text on a tinted background, which
+   is too light to read on a light page — deepen the text in light mode. */
+[data-theme="light"] :is(.uc-pill.ok, .admin-pill.live, .admin-priority.normal, .uc-status-success) {
+  color: #0f766e;
+}
+[data-theme="light"] :is(.uc-pill.done, .admin-pill.in-review) {
+  color: #1d4ed8;
+}
+[data-theme="light"] :is(.uc-pill.rejected, .admin-pill.rejected, .admin-priority.high,
+  .admin-priority.critical, .uc-status-error, .admin-status-error) {
+  color: #be123c;
+}
+[data-theme="light"] :is(.uc-pill.wait, .admin-priority.mid, .admin-pill.pending) {
+  color: #a16207;
+}
+
+/* ── Welcome tour card (light) ──────────────────────────────────────────────
+   The intro card was a flat white box with near-white text. Give it a crisp,
+   modern look: multi-tint surface, a teal→gold accent strip on top, readable
+   text, deep-teal progress dots and the logo in its natural colours. */
+[data-theme="light"] .uc-tour-modal {
+  --uc-tour-dot-active: #0d9488;
+  --uc-tour-dot-idle: rgba(15, 35, 75, 0.16);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(13, 148, 136, 0.16), transparent 42%),
+    radial-gradient(circle at 100% 8%, rgba(244, 180, 70, 0.14), transparent 40%),
+    radial-gradient(circle at 60% 110%, rgba(99, 102, 241, 0.10), transparent 46%),
+    #ffffff;
+  border: 1px solid rgba(15, 35, 75, 0.08);
+  box-shadow: 0 30px 80px rgba(15, 35, 75, 0.18);
+  overflow: hidden;
+}
+[data-theme="light"] .uc-tour-modal::before {
+  inset: 0 0 auto 0;
+  height: 4px;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(90deg, #0d9488, #14b8a6 45%, #f4b446);
+}
+[data-theme="light"] .uc-tour-title { color: #0f1b2d; }
+[data-theme="light"] .uc-tour-desc { color: #475569; }
+/* Logo is gold-filtered → faint on white; restore its natural teal. */
+[data-theme="light"] .uc-tour-modal .uc-brand-logo {
+  filter: drop-shadow(0 6px 16px rgba(15, 118, 110, 0.20));
+}
+/* Close button: give it a clean light surface instead of the dark glass. */
+[data-theme="light"] .uc-tour-modal .uc-modal-close {
+  background: #ffffff;
+  border: 1px solid rgba(15, 35, 75, 0.12);
+  color: #0f1b2d;
+}
+
+/* ── Admin chrome legibility (light) ───────────────────────────────────── */
+/* Topbar "… Admini" label sits on a now-white chip; its near-white text
+   (#e8f7f3) vanished — switch it to near-black. */
+[data-theme="light"] .admin-topbar-user,
+[data-theme="light"] .admin-topbar-user span { color: #0f1b2d; }
+
+/* "Onaylananlar / Reddedilenler" count badges: the pale cyan (#67e8f9) used in
+   dark mode is unreadable on the white sidebar — use a much deeper cyan. */
+[data-theme="light"] .ktz-nav-badge {
+  background: rgba(14, 116, 144, 0.12);
+  color: #155e75;
+  border-color: rgba(14, 116, 144, 0.32);
+}
+
+/* "Reddet" decision button uses pale-pink text/fill that disappears on a light
+   card — and it's disabled until "İncelemeye Al" runs, which faded it further.
+   Deepen the colours and lift the disabled opacity so it stays legible. */
+[data-theme="light"] .ktz-decision-reject {
+  color: #be123c;
+  background: rgba(225, 29, 72, 0.10);
+  border-color: rgba(225, 29, 72, 0.38);
+}
+[data-theme="light"] .ktz-decision-row button:disabled { opacity: 0.5; }
+
+/* "Ekip Ata" decision button: pale amber text vanishes on light — deepen it. */
+[data-theme="light"] .ktz-decision-assign {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.14);
+  border-color: rgba(245, 158, 11, 0.42);
+}
+
+/* ── Report-queue badges (priority + status) ───────────────────────────────
+   The table renders pale accent text on faint tints — unreadable on white.
+   Deepen each tone. Also covers the Onaylananlar/Reddedilenler list (same
+   component, same classes). */
+[data-theme="light"] .ktz-status-badge.badge-cyan   { color: #0e7490; background: rgba(34, 211, 238, 0.16); }
+[data-theme="light"] .ktz-status-badge.badge-blue   { color: #1d4ed8; background: rgba(59, 130, 246, 0.16); }
+[data-theme="light"] .ktz-status-badge.badge-green  { color: #15803d; background: rgba(34, 197, 94, 0.18); }
+[data-theme="light"] .ktz-status-badge.badge-purple { color: #6d28d9; background: rgba(139, 92, 246, 0.18); }
+[data-theme="light"] .ktz-status-badge.badge-muted  { color: #475569; background: rgba(100, 116, 139, 0.18); }
+
+[data-theme="light"] .ktz-priority-badge.ktz-priority-critical { color: #b91c1c; background: rgba(239, 68, 68, 0.16); }
+[data-theme="light"] .ktz-priority-badge.ktz-priority-high     { color: #c2410c; background: rgba(249, 115, 22, 0.18); }
+[data-theme="light"] .ktz-priority-badge.ktz-priority-mid      { color: #b45309; background: rgba(245, 158, 11, 0.20); }
+[data-theme="light"] .ktz-priority-badge.ktz-priority-low      { color: #475569; background: rgba(100, 116, 139, 0.18); }
+
+/* Proof-chain status banner: pale teal/yellow text on a faint tint vanishes on
+   a light page — deepen text + tint for both states. */
+[data-theme="light"] .admin-proof-banner.is-ok {
+  background: rgba(13, 148, 136, 0.10);
+  border-color: rgba(13, 148, 136, 0.30);
+  color: #0f766e;
+}
+[data-theme="light"] .admin-proof-banner.is-warn {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.34);
+  color: #b45309;
+}
+
+/* ── Citizen light-theme legibility ────────────────────────────────────── */
+/* Golden "Hoş geldin" kicker washes out on light — deepen to a readable gold. */
+[data-theme="light"] .uc-kicker { color: #a16207; }
+
+/* Footer Kentİz logo is gold-filtered, so it disappears on a light page. Drop
+   the gold filter and keep a soft teal shadow so its natural colours show. */
+[data-theme="light"] .uc-footer .uc-brand-logo {
+  filter: drop-shadow(0 6px 16px rgba(15, 118, 110, 0.22));
+}
+
+/* Profile trigger inherits near-white text, so its dropdown chevron is invisible
+   on the light navbar (the avatar icon keeps its own dark colour). Darken it. */
+[data-theme="light"] .uc-profile-trigger { color: #0f1b2d; }
+
+/* "Oturumu Kapat": pale-pink text vanished on the light dropdown. Make it a
+   clear red-dominant danger button. */
+[data-theme="light"] .uc-profile-dropdown .danger {
+  color: #be123c;
+  background: rgba(225, 29, 72, 0.10);
+  border: 1px solid rgba(225, 29, 72, 0.30);
+  border-top: 1px solid rgba(225, 29, 72, 0.30);
+}
+[data-theme="light"] .uc-profile-dropdown .danger:hover {
+  background: rgba(225, 29, 72, 0.18);
+  color: #9f1239;
+}
+
+/* "Raporlarım" filtre sekmeleri: aktif sekmenin mint→altın gradyani acik temada
+   cirkin/cig duruyor ve uzerindeki beyaz yazi okunmuyor. Tok, duz teal dolgu +
+   net beyaz yazi kullan (birincil buton ile uyumlu). */
+[data-theme="light"] .uc-modal-tab.is-active {
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(13, 148, 136, 0.26);
+}
+
+/* ── Theme toggle button (shared) ──────────────────────────────────────── */
+.uc-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--uc-fog), 0.16);
+  background: rgba(var(--uc-fog), 0.07);
+  color: var(--uc-text);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+.uc-theme-toggle:hover {
+  background: rgba(var(--uc-fog), 0.13);
+  transform: translateY(-1px);
+}
+.uc-theme-toggle svg { width: 18px; height: 18px; }

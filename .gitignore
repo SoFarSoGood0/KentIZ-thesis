@@ -1,0 +1,94 @@
+# secrets / environment
+.env
+.env.*
+!.env.example
+
+# database / user uploads
+*.db
+*.sqlite
+*.sqlite3
+backend/uploads/
+__pycache__/
+*.pyc
+
+# dependencies
+node_modules/
+
+# Flutter / Dart generated
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+*.iml
+
+.venv/
+venv/
+# build output
+dist/
+build/
+
+# Vite cache
+.vite/
+vite.config.ts.timestamp-*
+vite.config.js.timestamp-*
+
+# logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# editor files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# test / coverage
+coverage/
+.nyc_output/
+
+# temporary files
+tmp/
+temp/
+.cache/
+
+# generated / exported design files
+*.zip
+*.rar
+*.7z
+
+# screenshots / drafts / old exports
+screenshots/
+exports/
+drafts/
+*.pt
+*.pth
+*.onnx
+*.engine
+*.tflite
+*.h5
+*.keras
+
+# datasets / training outputs
+runs/
+weights/
+models/
+checkpoints/
+datasets/
+.codex_appdata/
+.codex_appdata
+external_test/
+train_model.py
+train_model_v2.py
+prepare_dataset.py
+prepare_dataset_v2.py
+*.ps1

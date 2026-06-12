@@ -1,0 +1,11 @@
+{
+  "name": "urban_chain_mobile",
+  "short_name": "urban_chain_mobile",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0F2240",
+  "theme_color": "#1E3A5F",
+  "description": "UrbanChain mobile application prototype.",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false
+}
